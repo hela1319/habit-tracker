@@ -1,22 +1,29 @@
-// chart.js
 let chart;
-function renderChart(data) {
-  const ctx = document.getElementById('habitChart').getContext('2d');
+
+function updateChart() {
+  const ctx = document.getElementById("habitChart").getContext("2d");
+  const habits = getHabits();
+
+  const labels = habits.map(h => h.name);
+  const data = habits.map(h => h.streak);
+
   if (chart) chart.destroy();
 
   chart = new Chart(ctx, {
-    type: 'bar',
+    type: "bar",
     data: {
-      labels: data.map(h => h.name),
+      labels,
       datasets: [{
-        label: 'Days Completed',
-        data: data.map(h => h.dates.length),
-        backgroundColor: 'rgba(59, 130, 246, 0.6)',
+        label: "Streak",
+        data,
+        backgroundColor: "#4F46E5"
       }]
     },
     options: {
       responsive: true,
-      scales: { y: { beginAtZero: true } }
+      scales: {
+        y: { beginAtZero: true }
+      }
     }
   });
 }
