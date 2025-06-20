@@ -1,50 +1,47 @@
-// app.js
-async function loadHabits() {
-  const habits = await getHabits();
-  const list = document.getElementById('habitList');
-  list.innerHTML = '';
-  habits.forEach(habit => {
-    const li = document.createElement('li');
-    li.className = "flex justify-between items-center border p-2 rounded";
+let habits = getHabits();
 
-    const today = new Date().toDateString();
-    const checked = habit.dates.includes(today);
+function renderHabits() {
+  const habitList = document.getElementById("habitList");
+  habitList.innerHTML = "";
+
+  habits.forEach((habit, index) => {
+    const li = document.createElement("li");
+    li.className = "flex items-center justify-between border p-2 rounded";
 
     li.innerHTML = `
       <span>${habit.name}</span>
-      <button onclick="markDone(${habit.id})" class="text-sm ${checked ? 'bg-green-500' : 'bg-gray-300'} text-white px-2 py-1 rounded">
-        ${checked ? 'Done' : 'Mark'}
-      </button>
+      <div class="space-x-2">
+        <button onclick="incrementStreak(${index})" class="bg-green-500 text-white px-2 py-1 rounded">+1</button>
+        <button onclick="deleteHabit(${index})" class="bg-red-500 text-white px-2 py-1 rounded">X</button>
+      </div>
     `;
-    list.appendChild(li);
+    habitList.appendChild(li);
   });
 
-  renderChart(habits);
+  updateChart();
 }
 
-async function addHabit() {
-  const input = document.getElementById('habitInput');
-  if (input.value.trim()) {
-    await addHabitToDB(input.value.trim());
-    input.value = '';
-    loadHabits();
-  }
+function addHabit() {
+  const input = document.getElementById("habitInput");
+  const name = input.value.trim();
+  if (name === "") return;
+
+  habits.push({ name, streak: 0 });
+  saveHabits(habits);
+  input.value = "";
+  renderHabits();
 }
 
-async function markDone(id) {
-  const habits = await getHabits();
-  const habit = habits.find(h => h.id === id);
-  const today = new Date().toDateString();
-  if (!habit.dates.includes(today)) {
-    habit.dates.push(today);
-    await updateHabit(id, habit.dates);
-    loadHabits();
-  }
+function incrementStreak(index) {
+  habits[index].streak += 1;
+  saveHabits(habits);
+  renderHabits();
 }
 
-window.onload = () => {
-  loadHabits();
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
-  }
-};
+function deleteHabit(index) {
+  habits.splice(index, 1);
+  saveHabits(habits);
+  renderHabits();
+}
+
+renderHabits();
